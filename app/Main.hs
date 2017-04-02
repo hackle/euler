@@ -11,28 +11,28 @@ upsert ht k =
                     Just v -> H.insert ht k (v + 1)
                     Nothing -> H.insert ht k 1
 
--- uniqueSums :: [Int] -> IO (HashTable Int Int)
--- uniqueSums [] ht = ht
--- uniqueSums (x:[]) ht' = 
---     do  ht <- ht'
---         H.insert ht (x 1, 1); ht
+incre1 :: SumTable -> Int -> IO ()
+incre1 ht n =    H.mapM_ increByKey ht
+                where 
+                    increByKey :: ((Int, Int), Int) -> IO ()
+                    increByKey ((sum, len), v) = 
+                            upsert ht (sum + n, len + 1)
 
--- foo = do
---     ht <- H.new
---     H.insert ht 1 1
---     H.insert ht 2 4 
---     H.insert ht 3 9
---     return ht
+uniqueSums :: [Int] -> SumTable -> IO ()
+uniqueSums [] ht = return ()
+uniqueSums (x:xs) ht = do incre1 ht x; upsert ht (x, 1); uniqueSums xs ht
+
+filterUnique :: [((Int, Int), Int)] -> [((Int, Int), Int)]
+filterUnique xs = do    tup@((sum, len), dup) <- xs
+                        do  True <- return (len == 3 && dup == 1)
+                            return tup
 
 main :: IO ()
 main = 
     let ht' :: IO(SumTable)
         ht' = H.new in
         do  ht <- ht'
-            upsert ht (1, 1)
-            upsert ht (1, 1)
-            upsert ht (1, 1)
-            upsert ht (1, 1)
-            upsert ht (1, 2)
+            uniqueSums [1,3,6,8,10,11] ht
             do  xss <- H.toList ht
-                putStr $ show xss
+                let qualified = filterUnique xss in
+                    putStr $ show qualified
