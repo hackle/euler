@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lib
   build-depends:       base >= 4.7 && < 5
+                    ,  hashtables
   default-language:    Haskell2010
 
 executable euler201-exe
@@ -24,7 +25,7 @@ executable euler201-exe
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
-                    ,  hashtables
+                    ,  euler201
   default-language:    Haskell2010
 
 test-suite euler201-test
