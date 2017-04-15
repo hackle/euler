@@ -27,8 +27,8 @@ filterUnique xs = do    tup@((sum, len), dup) <- xs
                         do  True <- return (len == 3 && dup == 1)
                             return tup
 
-main :: IO ()
-main = 
+main_ :: IO ()
+main_ = 
     let ht' :: IO(SumTable)
         ht' = H.new in
         do  ht <- ht'
