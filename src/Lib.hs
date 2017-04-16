@@ -12,31 +12,36 @@ upsert ht k =
                     Just v -> H.insert ht k (v + 1)
                     Nothing -> H.insert ht k 1
 
-type FoldState = SumState -> IO ()
-
 incre1 :: SumTable -> Int -> IO ()
 incre1 ht n = 
     do  fstates <- H.foldM folder iniState ht
-        do fstates
+        fstates ()
         where 
-            iniState :: IO ()
-            iniState = return ()
+            iniState :: () -> IO ()
+            iniState () = return ()
             increByKey :: SumState -> IO ()
             increByKey ((sum, len), v) = 
                 upsert ht (sum + n, len + 1)
-            folder :: IO () -> SumState -> IO (IO ())
-            folder fs sm =
-                do  fs
-                    return (increByKey sm)
+            folder :: (() -> IO ()) -> SumState -> IO (() -> IO ())
+            folder k sm =
+                let res = \k' -> do k ()
+                                    increByKey sm
+                    in return res
 
 uniqueSums :: [Int] -> SumTable -> IO ()
 uniqueSums [] ht = return ()
 uniqueSums (x:xs) ht = do incre1 ht x; upsert ht (x, 1); uniqueSums xs ht
 
-filterUnique :: [((Int, Int), Int)] -> [((Int, Int), Int)]
-filterUnique xs = do    tup@((sum, len), dup) <- xs
-                        do  True <- return (len == 3 && dup == 1)
-                            return tup
+countOcc :: [((Int, Int), Int)] -> Int -> Int
+countOcc xs len =
+    sum mapLen
+    where mapLen = map (\((_, l), _) -> if l == len then l else 0) xs
+
+filterUnique :: [((Int, Int), Int)] -> Int -> [((Int, Int), Int)]
+filterUnique xs l = 
+    do  tup@((sum, len), dup) <- xs
+        do  True <- return (len == l && dup == 1)
+            return tup
 
 main_ :: IO ()
 main_ = 
@@ -45,6 +50,6 @@ main_ =
         do  ht <- ht'
             uniqueSums [1,3,6,8,10,11] ht
             do  xss <- H.toList ht
-                let qualified = filterUnique xss in
+                let qualified = filterUnique xss 3 in
                     putStr $ show qualified
 
