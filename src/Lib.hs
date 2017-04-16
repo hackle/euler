@@ -16,19 +16,18 @@ type FoldState = SumState -> IO ()
 
 incre1 :: SumTable -> Int -> IO ()
 incre1 ht n = 
-    do  fstates <- H.foldM folder (\_ -> return ()) ht
-        fstates ((1, 1), 1)
+    do  fstates <- H.foldM folder iniState ht
+        do fstates
         where 
+            iniState :: IO ()
+            iniState = return ()
             increByKey :: SumState -> IO ()
             increByKey ((sum, len), v) = 
                 upsert ht (sum + n, len + 1)
-
-            folder :: FoldState -> SumState -> IO (FoldState)
-            folder fs sm = 
-                let res = \sm' -> 
-                            do  increByKey sm
-                                increByKey sm'
-                    in return res
+            folder :: IO () -> SumState -> IO (IO ())
+            folder fs sm =
+                do  fs
+                    return (increByKey sm)
 
 uniqueSums :: [Int] -> SumTable -> IO ()
 uniqueSums [] ht = return ()
