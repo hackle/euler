@@ -2,6 +2,7 @@ module Lib where
 
 import qualified Data.HashTable.IO as H
 
+type SumState = ((Int, Int), Int)
 type SumTable = H.BasicHashTable (Int, Int) Int
 
 upsert :: SumTable -> (Int, Int) -> IO ()
@@ -11,12 +12,23 @@ upsert ht k =
                     Just v -> H.insert ht k (v + 1)
                     Nothing -> H.insert ht k 1
 
+type FoldState = SumState -> IO ()
+
 incre1 :: SumTable -> Int -> IO ()
-incre1 ht n =    H.mapM_ increByKey ht
-                where 
-                    increByKey :: ((Int, Int), Int) -> IO ()
-                    increByKey ((sum, len), v) = 
-                            upsert ht (sum + n, len + 1)
+incre1 ht n = 
+    do  fstates <- H.foldM folder (\_ -> return ()) ht
+        fstates ((1, 1), 1)
+        where 
+            increByKey :: SumState -> IO ()
+            increByKey ((sum, len), v) = 
+                upsert ht (sum + n, len + 1)
+
+            folder :: FoldState -> SumState -> IO (FoldState)
+            folder fs sm = 
+                let res = \sm' -> 
+                            do  increByKey sm
+                                increByKey sm'
+                    in return res
 
 uniqueSums :: [Int] -> SumTable -> IO ()
 uniqueSums [] ht = return ()

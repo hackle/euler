@@ -21,3 +21,11 @@ main = hspec $ do
                 upsert ht (1,1)
                 maybeV  <- H.lookup ht (1,1)
                 maybeV `shouldBe` (Just 2)
+    describe "incre1" $ do
+        it "Incre every existing element" $ do
+            do  ht <- H.new
+                upsert ht (1,1)
+                -- upsert ht (2,2)
+                incre1 ht (2)
+                xss <- H.toList ht
+                xss `shouldBe` [((1,1),2)]
