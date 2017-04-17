@@ -4,6 +4,11 @@ import Lib
 
 import qualified Data.HashTable.IO as H
 
+countOcc :: [((Int, Int), Int)] -> Int -> Int
+countOcc xs len =
+    sum mapLen
+    where mapLen = map (\((_, l), occ) -> if l == len then occ else 0) xs
+
 main :: IO ()
 main = hspec $ do
     describe "anything" $ do

@@ -32,11 +32,6 @@ uniqueSums :: [Int] -> SumTable -> IO ()
 uniqueSums [] ht = return ()
 uniqueSums (x:xs) ht = do incre1 ht x; upsert ht (x, 1); uniqueSums xs ht
 
-countOcc :: [((Int, Int), Int)] -> Int -> Int
-countOcc xs len =
-    sum mapLen
-    where mapLen = map (\((_, l), _) -> if l == len then l else 0) xs
-
 filterUnique :: [((Int, Int), Int)] -> Int -> [((Int, Int), Int)]
 filterUnique xs l = 
     do  tup@((sum, len), dup) <- xs
