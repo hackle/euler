@@ -5,8 +5,8 @@ import qualified Data.HashTable.IO as H
 type SumState = ((Int, Int), Int)
 type SumTable = H.BasicHashTable (Int, Int) Int
 
-incre1 :: SumTable -> Int -> Int -> IO ()
-incre1 ht n maxLen = 
+incre1 :: SumTable -> Int -> Int -> Int -> IO ()
+incre1 ht n maxLen distance = 
     do  fstates <- H.foldM folder iniState ht
         fstates ()
         where 
@@ -14,7 +14,7 @@ incre1 ht n maxLen =
             iniState () = return ()
             increByKey :: SumState -> IO ()
             increByKey (k@(sum, len), v) = 
-                if  len == maxLen -- no point going on
+                if  len == maxLen || len + distance < maxLen -- no point going on
                     then return ()
                     else
                         let k' = (sum + n, len + 1) in
@@ -31,9 +31,10 @@ incre1 ht n maxLen =
 uniqueSums :: [Int] -> Int -> SumTable -> IO ()
 uniqueSums [] _ ht = return ()
 uniqueSums (x:xs) maxLen ht = 
-    do  incre1 ht x maxLen
+    do  incre1 ht x maxLen distance
         H.insert ht (x, 1) 1
         uniqueSums xs maxLen ht
+        where distance = length xs
 
 filterUnique :: [((Int, Int), Int)] -> Int -> [Int]
 filterUnique xs l = 
