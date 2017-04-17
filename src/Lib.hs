@@ -20,7 +20,8 @@ incre1 ht n maxLen distance =
                         let k' = (sum + n, len + 1) in
                             do  maybeV <- H.lookup ht k'
                                 case    maybeV of
-                                        Just o -> H.insert ht k' (o + 1)
+                                        Just 1 -> H.insert ht k' 2
+                                        Just o -> return () --H.insert ht k' (o + 1)
                                         Nothing -> H.insert ht k' v
             folder :: (() -> IO ()) -> SumState -> IO (() -> IO ())
             folder k sm =
