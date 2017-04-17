@@ -6,22 +6,6 @@ import qualified Data.HashTable.IO as H
 
 main :: IO ()
 main = hspec $ do
-    -- describe "anything" $ do
-    --     it "certainly true" $ do
-    --         1 `shouldBe` 1
-    -- describe "upsert" $ do
-    --     it "inserts if not existent" $ do
-    --         do  ht <- H.new
-    --             upsert ht (1,1)
-    --             maybeV <- H.lookup ht (1,1)
-    --             maybeV `shouldBe` (Just 1)
-    --     it "updates if existent" $ do
-    --         do  ht <- H.new
-    --             upsert ht (1,1)
-    --             upsert ht (1,1)
-    --             upsert ht (1,1)
-    --             maybeV  <- H.lookup ht (1,1)
-    --             maybeV `shouldBe` (Just 3)
     -- describe "incre1" $ do
     --     it "Incre every existing element" $ do
     --         do  ht <- H.new
@@ -56,31 +40,36 @@ main = hspec $ do
     --             uniqueSums [1, 2] ht
     --             xss <- H.toList ht
     --             length xss `shouldBe` 3
-        it "correct combinations" $ do
-            do  ht <- H.fromList [((8,3),1),((3,2),1),((5,2),2),((3,1),1),((4,1),1),((10,4),1),((1,1),1),((6,3),1),((4,2),1),((6,2),1),((2,1),1),((7,2),1),((7,3),1),((9,3),1)]
-                uniqueSums [5] ht
+        -- it "correct combinations" $ do
+        --     do  ht <- H.fromList [((8,3),1),((3,2),1),((5,2),2),((3,1),1),((4,1),1),((10,4),1),((1,1),1),((6,3),1),((4,2),1),((6,2),1),((2,1),1),((7,2),1),((7,3),1),((9,3),1)]
+        --         uniqueSums [5] ht
+        --         xss <- H.toList ht
+        --         countOcc xss `shouldBe` [((1,1),1)]
+        --         countOcc xss 5 `shouldBe` 1
+        --         countOcc xss 4 `shouldBe` 5
+        --         -- filterByLen 3 xss `shouldBe` [((1,1), 1)]
+        --         countOcc xss 3 `shouldBe` 10
+        --         countOcc xss 2 `shouldBe` 10
+        --         countOcc xss 1 `shouldBe` 5
+        it "correct combinations with 3 out 6" $ do
+            do  ht <- H.new
+                uniqueSums [1,3,6,8,10,11] ht
                 xss <- H.toList ht
-                xss `shouldBe` [((1,1),1)]
-                countOcc xss 5 `shouldBe` 1
-                countOcc xss 4 `shouldBe` 5
-                -- filterByLen 3 xss `shouldBe` [((1,1), 1)]
-                countOcc xss 3 `shouldBe` 10
-                countOcc xss 2 `shouldBe` 10
-                countOcc xss 1 `shouldBe` 5
-        -- it "correct combinations with 3 out 6" $ do
-        --     do  ht <- H.new
-        --         uniqueSums [1,3,6,8,10,11] ht
-        --         xss <- H.toList ht
-        --         filterByLen 3 xss `shouldBe` [((1,1),1)]
-        --         countOcc xss 3 `shouldBe` 20
-        -- it "is correct for the sample" $ do
-        --     do  ht <- H.new
-        --         uniqueSums [1,3,6,8,10,11] ht
-        --         xss <- H.toList ht
-        --         let unik = filter (\((_, len), dup) -> 3 == len) xss
-        --             in
-        --         -- let unik = filterUnique xss
-        --                 unik `shouldBe` [((1,1), 1)]
+                countOcc xss 3 `shouldBe` 20
+        it "is correct for the sample" $ do
+            do  ht <- H.new
+                uniqueSums [1,3,6,8,10,11] ht
+                xss <- H.toList ht
+                let unik = filterUnique xss 3
+                    in
+                        length unik `shouldBe` 8
+        it "is correct for the sample 2" $ do
+            do  ht <- H.new
+                uniqueSums [10,12,14,18,21,25,27,29] ht
+                xss <- H.toList ht
+                let unik = filterUnique xss 3
+                    in
+                        length unik `shouldBe` 156
 
 filterByLen :: Int -> [((Int, Int), Int)] -> [((Int, Int), Int)]
 filterByLen l = filter (\((sum, len), occ) -> len == l)
