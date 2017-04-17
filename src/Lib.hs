@@ -34,7 +34,7 @@ uniqueSums (x:xs) maxLen ht =
     do  incre1 ht x maxLen distance
         H.insert ht (x, 1) 1
         uniqueSums xs maxLen ht
-        where distance = length xs
+        where distance = 1 + (length xs)
 
 filterUnique :: [((Int, Int), Int)] -> Int -> [Int]
 filterUnique xs l = 
