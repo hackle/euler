@@ -62,14 +62,8 @@ main = hspec $ do
                 xss <- H.toList ht
                 let unik = filterUnique xss 3
                     in
-                        length unik `shouldBe` 8
-        it "is correct for the sample 2" $ do
-            do  ht <- H.new
-                uniqueSums [10,12,14,18,21,25,27,29] ht
-                xss <- H.toList ht
-                let unik = filterUnique xss 3
-                    in
-                        length unik `shouldBe` 156
+                        do  length unik `shouldBe` 8
+                            sum unik `shouldBe` 156
 
 filterByLen :: Int -> [((Int, Int), Int)] -> [((Int, Int), Int)]
 filterByLen l = filter (\((sum, len), occ) -> len == l)

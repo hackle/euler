@@ -32,11 +32,11 @@ uniqueSums (x:xs) ht =
         H.insert ht (x, 1) 1
         uniqueSums xs ht
 
-filterUnique :: [((Int, Int), Int)] -> Int -> [((Int, Int), Int)]
+filterUnique :: [((Int, Int), Int)] -> Int -> [Int]
 filterUnique xs l = 
     do  tup@((sum, len), dup) <- xs
         do  True <- return (len == l && dup == 1)
-            return tup
+            return sum
 
 main_ :: IO ()
 main_ = 
