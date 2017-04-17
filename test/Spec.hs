@@ -53,12 +53,12 @@ main = hspec $ do
         --         countOcc xss 1 `shouldBe` 5
         it "correct combinations with 3 out 6" $ do
             do  ht <- H.new
-                uniqueSums [1,3,6,8,10,11] ht
+                uniqueSums [1,3,6,8,10,11] 3 ht
                 xss <- H.toList ht
                 countOcc xss 3 `shouldBe` 20
         it "is correct for the sample" $ do
             do  ht <- H.new
-                uniqueSums [1,3,6,8,10,11] ht
+                uniqueSums [1,3,6,8,10,11] 3 ht
                 xss <- H.toList ht
                 let unik = filterUnique xss 3
                     in
