@@ -8,9 +8,14 @@ type SumTable = H.BasicHashTable (Int, Int) Int
 upsert :: SumTable -> (Int, Int) -> IO ()
 upsert ht k =
         do  maybeV <- H.lookup ht k
+            putStr $ "looking for " ++ (show k) ++ "found" ++ (show maybeV) ++ "\r\n"
             case    maybeV of
-                    Just v -> H.insert ht k (v + 1)
-                    Nothing -> H.insert ht k 1
+                    Just v ->
+                        do  putStr $ "updating" ++ (show k) ++ "with" ++ (show (v + 1))  ++ "\r\n"
+                            H.insert ht k (v + 1)
+                    Nothing -> 
+                        do  putStr $ "inserting" ++ (show k) ++ "with 1" ++ "\r\n"
+                            H.insert ht k 1
 
 incre1 :: SumTable -> Int -> IO ()
 incre1 ht n = 
