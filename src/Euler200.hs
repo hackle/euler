@@ -48,12 +48,17 @@ orderOnce (xs, taken@(p1@(Products (th:tt)):ts), maxHead, src@((Products s):ss))
         minHead = th
         takeNext = minHead == maxHead
         maxHead' = if takeNext then (head s) else maxHead
-        xs' = minHead:xs
-        taken' = if takeNext then insert (Products s) $ insert (Products tt) $ delete p1 taken else taken
+        xs' = [minHead]
+        taken' = 
+            let updated = insert (Products tt) $ delete p1 taken in
+                if takeNext then insert (Products s) updated  else updated
         src' = if takeNext then ss else src
 
 squbes :: [Integer]
-squbes = map head allCombos
+squbes = concatMap fsts $ iterate orderOnce ([], [], 0, allComboProducts)
+    where
+        fsts (h, _, _, _) = h
+        allComboProducts = map (\xs -> Products xs) allCombos
 
 isPossiblyPrime :: Integer -> Bool
 isPossiblyPrime n = 1 == 2 ^ (n - 1) `mod` n
