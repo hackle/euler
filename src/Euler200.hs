@@ -38,6 +38,11 @@ allCombos = do
 type OrderState = ([Integer], [Products], Integer, [Products])
 
 orderOnce :: OrderState -> OrderState
+orderOnce ([], [], _, src@((Products s):ss)) =
+    ([], [Products s], sh, src')
+    where
+        (sh:_) = s
+        src' = delete (Products s) src
 orderOnce (xs, taken@(p1@(Products (th:tt)):ts), maxHead, src@((Products s):ss)) = (xs', taken', maxHead', src')
     where
         minHead = th

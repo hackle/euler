@@ -10,6 +10,13 @@ main = hspec $ do
             isAscending (take 1000 squbes) `shouldBe` True
     
     describe "Order once" $ do
+        it "initializes properly" $ do
+            let ori = ([], [], 0, [Products [5..10], Products [11..15]])
+                res = ([], [Products [5..10]], 5, [Products [11..15]])
+                res1 = ([5], [Products [6, 10], Products [11..15]], 11, [])
+                in do
+                    orderOnce ori `shouldBe` res
+                    (orderOnce $ orderOnce ori) `shouldBe` res1
         it "Shifts head around" $ do
             let ori = ([], [Products [1..4]], 1, [Products [5..10], Products [11..15]])
                 res = ([1], [Products [2..4], Products [5..10]], 5, [Products [11..15]])
