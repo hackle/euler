@@ -1,14 +1,12 @@
 module Euler200 where 
 
-import qualified Data.HashTable.IO as H
+import Data.List
 
-newtype Products = Products [Integer]
+newtype Products = Products [Integer] deriving (Show)
 instance Eq Products where
     (Products p1@(x1:_)) == (Products p2@(x2:_)) = x1 == x2
 instance Ord Products where
     (Products p1@(x1:_)) `compare` (Products p2@(x2:_)) = x1 `compare` x2
-
-type SqubeTable = H.BasicHashTable Integer [Integer]
  
 oddsFrom3 :: [Integer]
 oddsFrom3 = (let increBy2From x = x:(increBy2From (x+2)) in increBy2From 5)
@@ -27,10 +25,8 @@ primes = 2:3:(infi [2, 3] oddsFrom3)
 
 allCombos :: [ [Integer] ]
 allCombos = do
-    map (fromOne combo32) primes ++ (map (fromOne combo23) primes)
-    where 
-        combo23 :: Integer -> Integer -> Integer
-        combo23 n1 n2 = n1 ^ 2 * n2 ^ 3
+    map (fromOne combo32) primes
+    where
         combo32 :: Integer -> Integer -> Integer
         combo32 n1 n2 = n1 ^ 3 * n2 ^ 2
         fromOne :: (Integer -> Integer -> Integer) -> Integer -> [ Integer ]
@@ -39,6 +35,18 @@ allCombos = do
             True <- return (n /= n1)
             return (f n n1)
     
+type OrderState = ([Integer], [Products], Integer, [Products])
+
+orderOnce :: OrderState -> OrderState
+orderOnce (xs, taken@(p1@(Products (th:tt)):ts), maxHead, src@((Products s):ss)) = (xs', taken', maxHead', src')
+    where
+        minHead = th
+        takeNext = minHead == maxHead
+        maxHead' = if takeNext then (head s) else maxHead
+        xs' = minHead:xs
+        taken' = if takeNext then insert (Products s) $ insert (Products tt) $ delete p1 taken else taken
+        src' = if takeNext then ss else src
+
 squbes :: [Integer]
 squbes = map head allCombos
 
