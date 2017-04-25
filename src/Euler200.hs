@@ -48,11 +48,14 @@ orderOnce (xs, taken@(p1@(Products (th:tt)):ts), maxHead, src@((Products s):ss))
         minHead = th
         takeNext = minHead == maxHead
         maxHead' = if takeNext then (head s) else maxHead
-        xs' = [minHead]
+        xs' = if isPrimeProof200 minHead then [minHead] else []
         taken' = 
             let updated = insert (Products tt) $ delete p1 taken in
                 if takeNext then insert (Products s) updated  else updated
         src' = if takeNext then ss else src
+
+contains200 :: Integer -> Bool
+contains200 n = isInfixOf "200" (show n)
 
 squbes :: [Integer]
 squbes = concatMap fsts $ iterate orderOnce ([], [], 0, allComboProducts)
@@ -81,11 +84,9 @@ variations str len =
 
 
 isPrimeProof200 :: Integer -> Bool
-isPrimeProof200 n =
-    contains200 && noVariantIsPrime
+isPrimeProof200 n = contains200 n && noVariantIsPrime
     where
         str = show n
         len = length str
-        contains200 = isInfixOf "200" str
         noVariantIsPrime = all (not . isPossiblyPrime) (variations str len)
         
