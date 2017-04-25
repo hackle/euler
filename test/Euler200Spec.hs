@@ -5,6 +5,11 @@ import Data.List
 
 main :: IO ()
 main = hspec $ do
+    describe "isPrimeProof200" $ do
+        it "judges corrects" $ do
+            isPrimeProof200 200 `shouldBe` True
+            isPrimeProof200 1992008 `shouldBe` True
+
     describe "squbes" $ do
         it "is ordered ascending" $ do
             isAscending (take 1000 squbes) `shouldBe` True

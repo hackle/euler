@@ -62,3 +62,30 @@ squbes = concatMap fsts $ iterate orderOnce ([], [], 0, allComboProducts)
 
 isPossiblyPrime :: Integer -> Bool
 isPossiblyPrime n = 1 == 2 ^ (n - 1) `mod` n
+
+easyDigits = ['0','2','4','5','6','8']
+toughDigits = ['1','3','7','9']
+allDigits = ['0' .. '9']
+
+replaceAt str len idx =
+    let digits = delete (str!!idx) $ if idx == len - 1 then toughDigits else allDigits 
+        replaceOne d = (take idx str) ++ [d] ++ (drop (idx + 1) str)
+        in map replaceOne digits
+
+variations str len =
+    let inits = init str
+        vs = if elem (last str) easyDigits
+                then map (\x -> inits++[x]) toughDigits
+                else concatMap (replaceAt str len) [0..(len - 1)]
+        in map (\s -> read s::Integer) vs
+
+
+isPrimeProof200 :: Integer -> Bool
+isPrimeProof200 n =
+    contains200 && noVariantIsPrime
+    where
+        str = show n
+        len = length str
+        contains200 = isInfixOf "200" str
+        noVariantIsPrime = all (not . isPossiblyPrime) (variations str len)
+        
