@@ -73,3 +73,12 @@ isPrimeProof200 n = contains200 n && noVariantIsPrime
         len = length str
         noVariantIsPrime = all (not . isPossiblyPrime) (variations str len)
         
+--https://primes.utm.edu/prove/prove2_3.html
+isPrime :: Integer -> Bool
+isPrime n = any (\a -> isModule1 a || isModuleMinus1 a) bases
+    where
+        isModule1 a = a^d `mod` n == 1
+        isModuleMinus1 a = any (\r -> (a^d)^(2^r) `mod` n == n - 1) [1..(s-1)]
+        (s, d) = 
+            let d1 = (n-1) `div` 2 in last $ takeWhile (\(s,d) -> 2^s * d == (n - 1)) [ (s, d) | s <- [1..], d <- [d1, (d1 + 2)..]]
+        bases = take 7 primes
