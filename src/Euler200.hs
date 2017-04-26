@@ -44,9 +44,6 @@ takeOnce src@(p1:ss) = p1Head:(takeOnce src')
 squbes :: [Integer]
 squbes = takeOnce allCombos
 
-isPossiblyPrime :: Integer -> Bool
-isPossiblyPrime n = 1 == 2 ^ (n - 1) `mod` n
-
 easyDigits = ['0','2','4','5','6','8']
 toughDigits = ['1','3','7','9']
 allDigits = ['0' .. '9']
@@ -71,14 +68,32 @@ isPrimeProof200 n = contains200 n && noVariantIsPrime
     where
         str = show n
         len = length str
-        noVariantIsPrime = all (not . isPossiblyPrime) (variations str len)
+        noVariantIsPrime = all (not . isPrime) (variations str len)
         
 --https://primes.utm.edu/prove/prove2_3.html
+isModule1 :: Integer -> Integer -> Integer -> Bool
+isModule1 n d a = a^d `mod` n == 1
+
+isModuleMinus1 :: Integer -> Integer -> Integer -> Integer -> Bool
+isModuleMinus1 n d s a = any (\r -> (a^(d*2^r)) `mod` n == n - 1) [0..(s-1)]
+
+getS :: Integer -> Integer 
+getS n = last $ takeWhile (\p -> 0 == (n-1) `mod` 2^p) [1..]
+
+getD :: Integer -> Integer -> Integer
+getD n s = (n-1) `div` (2^s)
+
+presets = [ (1373653, 2), (25326001, 3), (25000000000, 4), (2152302898747, 5), (3474749660383, 6) ]
+
+bases :: Integer -> [Integer]
+bases n = 
+    let thresh = find (\(n1, _) -> n < n1) presets in
+        case thresh of
+            Just (_, m) -> take m primes
+            Nothing -> take 7 primes
+
 isPrime :: Integer -> Bool
-isPrime n = any (\a -> isModule1 a || isModuleMinus1 a) bases
-    where
-        isModule1 a = a^d `mod` n == 1
-        isModuleMinus1 a = any (\r -> (a^(d*2^r)) `mod` n == n - 1) [0..(s-1)]
-        s = last $ takeWhile (\p -> 0 == (n-1) `mod` 2^p) [1..]
-        d = (n-1) `div` (2^s)
-        bases = take 7 primes
+isPrime n = 
+    let s = getS n 
+        d = getD n s in
+            all (\a -> isModule1 n d a || isModuleMinus1 n d s a) (bases n)
