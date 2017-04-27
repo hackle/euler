@@ -75,7 +75,15 @@ isModule1 :: Integer -> Integer -> Integer -> Bool
 isModule1 n d a = a^d `mod` n == 1
 
 isModuleMinus1 :: Integer -> Integer -> Integer -> Integer -> Bool
-isModuleMinus1 n d s a = any (\r -> (a^(d*2^r)) `mod` n == n - 1) [0..(s-1)]
+isModuleMinus1 n d s a = fst $ foldl isMatch (False, a^d) [0..(s-1)]
+    where
+        isMatch st@(matching, prd) _ = 
+            case matching of
+                True -> st
+                False -> 
+                    let m = elem (prd `mod` n) [1, n - 1]
+                        prd' = if m then prd else prd ^ 2 in 
+                        (m, prd')
 
 getS :: Integer -> Integer 
 getS n = last $ takeWhile (\p -> 0 == (n-1) `mod` 2^p) [1..]
@@ -96,4 +104,4 @@ isPrime :: Integer -> Bool
 isPrime n = 
     let s = getS n 
         d = getD n s in
-            all (\a -> isModule1 n d a || isModuleMinus1 n d s a) (bases n)
+            all (\a -> isModuleMinus1 n d s a) (bases n)
