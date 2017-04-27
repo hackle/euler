@@ -75,15 +75,12 @@ isModule1 :: Integer -> Integer -> Integer -> Bool
 isModule1 n d a = a^d `mod` n == 1
 
 isModuleMinus1 :: Integer -> Integer -> Integer -> Integer -> Bool
-isModuleMinus1 n d s a = fst $ foldl isMatch (False, a^d) [0..(s-1)]
+isModuleMinus1 n d s a = any isMatch [0..(s-1)] 
     where
-        isMatch st@(matching, prd) _ = 
-            case matching of
-                True -> st
-                False -> 
-                    let m = elem (prd `mod` n) [1, n - 1]
-                        prd' = if m then prd else prd ^ 2 in 
-                        (m, prd')
+        isMatch bs =
+            let res = foldl (foldOnN n) 1 $ replicate (fromInteger 2^bs) fx in
+                elem (res `mod` n) [1, n-1]
+        fx = powerMod a d n
 
 getS :: Integer -> Integer 
 getS n = last $ takeWhile (\p -> 0 == (n-1) `mod` 2^p) [1..]
@@ -92,6 +89,10 @@ getD :: Integer -> Integer -> Integer
 getD n s = (n-1) `div` (2^s)
 
 presets = [ (1373653, 2), (25326001, 3), (25000000000, 4), (2152302898747, 5), (3474749660383, 6) ]
+
+fxPwr :: Integer
+fxPwr = 1024
+primesAndExps = map (\x -> (x, x^fxPwr)) $ take 7 primes
 
 bases :: Integer -> [Integer]
 bases n = 
@@ -105,3 +106,16 @@ isPrime n =
     let s = getS n 
         d = getD n s in
             all (\a -> isModuleMinus1 n d s a) (bases n)
+
+foldOnN n st x = ((st `mod` n)* x) `mod` n
+
+powerMod :: Integer -> Integer -> Integer -> Integer
+powerMod b p n =
+    let res = b^rmd `mod` n * (foldl (foldOnN n) 1 $ replicate cnt fx) in
+        res `mod` n
+    where 
+        fxExp = snd $ head $ filter (\(x,_) -> x == b) primesAndExps
+        fx = fxExp `mod` n
+        cnt :: Int
+        cnt = fromInteger (p `div` fxPwr)
+        rmd = p `mod` fxPwr
