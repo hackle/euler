@@ -91,7 +91,7 @@ getD n s = (n-1) `div` (2^s)
 presets = [ (1373653, 2), (25326001, 3), (25000000000, 4), (2152302898747, 5), (3474749660383, 6) ]
 
 fxPwr :: Integer
-fxPwr = 1024
+fxPwr = 2^16
 primesAndExps = map (\x -> (x, x^fxPwr)) $ take 7 primes
 
 bases :: Integer -> [Integer]
