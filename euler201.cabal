@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lib
                     ,  Euler200
+                    ,  Euler202
   build-depends:       base >= 4.7 && < 5
                     ,  hashtables
   default-language:    Haskell2010
@@ -32,7 +33,7 @@ executable euler201-exe
 test-suite euler201-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Euler200Spec.hs
+  main-is:             Euler202Spec.hs
   build-depends:       base
                      , euler201
                      , hspec
