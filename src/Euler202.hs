@@ -2,13 +2,26 @@ module Euler202 where
 
 import Data.List
 
+leakyPoints :: Integer -> ([Integer], Integer)
+leakyPoints hits = foldl folder ([], 0) points
+        where 
+            y = (hits + 1) `div` 2 + 1
+            startX = if even y then 6 else 3
+            cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
+            points = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
+            folder (leaky, cnt) pt =
+                if any (\p -> pt `mod` p == 0) leaky
+                    then (leaky, cnt)
+                    else if hasLeak y pt 
+                            then (pt:leaky, cnt)
+                            else (leaky, cnt + 1)
+
+validPoints :: Integer -> Integer
+validPoints hits = snd $ leakyPoints hits
+
 bounces :: Integer -> Integer
 bounces hits = 
-    let y = (hits + 1) `div` 2 + 1
-        startX = if even y then 6 else 3
-        cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
-        cnt = cCount - (toInteger $ length $ (leakPoints y)) in
-        -- cnt = length $ filter (not . (hasLeak y)) $ takeWhile (< y) [ startX + x * 6 | x <- [0..]] in
+        let cnt = validPoints hits in
         (toInteger cnt) * (2::Integer)
 
 isValidPoint :: Integer -> Integer -> Bool
