@@ -16,11 +16,11 @@ bounces hits =
         let cnt = length $ validPoints hits in
         (toInteger cnt) * (2::Integer)
 
-isValidPoint :: Integer -> Integer -> Bool
-isValidPoint x y = odd y == odd x
+isValidPoint :: (Integer, Integer) -> Bool
+isValidPoint (x, y) = odd y == odd x
 
 isC :: Integer -> Integer -> Bool
-isC x y = isValidPoint x y && x `mod` 6 == (if odd y then 3 else 0)
+isC x y = isValidPoint (x, y) && x `mod` 6 == (if odd y then 3 else 0)
 
 primesFrom :: Integer -> [Integer] -> [Integer]
 primesFrom n xs = 
@@ -44,23 +44,37 @@ primeFactorize n = filter (\x -> n `mod` x == 0) (takeWhile (<= sqroot) primes)
     where
         sqroot = floor $ sqrt (fromInteger n)
 
-hasLeak' y yFacts x =
-    any (\fctr -> x `mod` fctr == 0 && isValidPoint (y `div` fctr) (x `div` fctr)) yFacts
+findFirstLeakyX :: Integer -> [Integer] -> Integer -> Maybe Integer
+findFirstLeakyX y xs y1 = 
+    find isLeaking xs
+    where
+        division = y `div` y1
+        isLeaking :: Integer -> Bool
+        isLeaking x = x `mod` division == 0 && (isValidPoint (x `div` division, y1))
+
+findLeak :: Integer -> [Integer] -> Integer -> Maybe (Integer, Integer)
+findLeak y yFacts x = 
+    case find isLeaking yFacts of
+        Nothing -> Nothing
+        Just fctr -> Just (calcPoint fctr)
+    where 
+        calcPoint fctr = (y `div` fctr, x `div` fctr)
+        isLeaking fctr = x `mod` fctr == 0 && (isValidPoint $ calcPoint fctr)
 
 hasLeak :: Integer -> Integer -> Bool
-hasLeak y = hasLeak' y $ primeFactorize y
+hasLeak y = (Nothing /=) . (findLeak y $ primeFactorize y)
 
-leakPoints :: Integer -> [Integer]
-leakPoints y = nub $ foldl calcX [] [(y1, x1) | y1 <- facts, x1 <- [1..(y1-1)]]
-    where 
-        facts = factorize y
-        calcX :: [Integer] -> (Integer, Integer) -> [Integer]
-        calcX st (y1, x1) =
-            let valid = 
-                    if isValidPoint x1 y1 
-                        then isC projectedX y 
-                        else False                 
-                projectedX = (x1 * y `div` y1) in
-                if valid then insert projectedX st else st
+-- leakPoints :: Integer -> [Integer]
+-- leakPoints y = nub $ foldl calcX [] [(y1, x1) | y1 <- facts, x1 <- [1..(y1-1)]]
+--     where 
+--         facts = factorize y
+--         calcX :: [Integer] -> (Integer, Integer) -> [Integer]
+--         calcX st (y1, x1) =
+--             let valid = 
+--                     if isValidPoint x1 y1 
+--                         then isC projectedX y 
+--                         else False                 
+--                 projectedX = (x1 * y `div` y1) in
+--                 if valid then insert projectedX st else st
 
 
