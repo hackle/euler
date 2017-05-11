@@ -2,26 +2,18 @@ module Euler202 where
 
 import Data.List
 
-leakyPoints :: Integer -> ([Integer], Integer)
-leakyPoints hits = foldl folder ([], 0) points
+validPoints :: Integer -> [ Integer ]
+validPoints hits = filter (not.hasLeak') points
         where 
             y = (hits + 1) `div` 2 + 1
             startX = if even y then 6 else 3
             cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
             points = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
-            folder (leaky, cnt) pt =
-                if any (\p -> pt `mod` p == 0) leaky
-                    then (leaky, cnt)
-                    else if hasLeak y pt 
-                            then (pt:leaky, cnt)
-                            else (leaky, cnt + 1)
-
-validPoints :: Integer -> Integer
-validPoints hits = snd $ leakyPoints hits
+            hasLeak' = hasLeak y
 
 bounces :: Integer -> Integer
 bounces hits = 
-        let cnt = validPoints hits in
+        let cnt = length $ validPoints hits in
         (toInteger cnt) * (2::Integer)
 
 isValidPoint :: Integer -> Integer -> Bool
@@ -52,14 +44,11 @@ primeFactorize n = filter (\x -> n `mod` x == 0) (takeWhile (<= sqroot) primes)
     where
         sqroot = floor $ sqrt (fromInteger n)
 
+hasLeak' y yFacts x =
+    any (\fctr -> x `mod` fctr == 0 && isValidPoint (y `div` fctr) (x `div` fctr)) yFacts
+
 hasLeak :: Integer -> Integer -> Bool
-hasLeak a = 
-    let factsA = primeFactorize a in
-        \b ->
-            let cds = filter (\x -> b `mod` x == 0) factsA in
-                if [] == cds
-                    then False
-                    else any (\fctr -> isValidPoint (a `div` fctr) (b `div` fctr)) cds
+hasLeak y = hasLeak' y $ primeFactorize y
 
 leakPoints :: Integer -> [Integer]
 leakPoints y = nub $ foldl calcX [] [(y1, x1) | y1 <- facts, x1 <- [1..(y1-1)]]
