@@ -40,9 +40,11 @@ factorize n = sort $ nub $ concatMap byP (takeWhile (<= sqroot) primes)
             else []
 
 primeFactorize :: Integer -> [Integer]
-primeFactorize n = filter (\x -> n `mod` x == 0) (takeWhile (<= sqroot) primes)
-    where
+primeFactorize n = filter (flip elem primes') $ factorize n 
+    where 
         sqroot = floor $ sqrt (fromInteger n)
+        primes' = (takeWhile (<= sqroot) primes)
+
 
 findFirstLeakyX :: Integer -> [Integer] -> Integer -> Maybe Integer
 findFirstLeakyX y xs y1 = 
@@ -64,17 +66,46 @@ findLeak y yFacts x =
 hasLeak :: Integer -> Integer -> Bool
 hasLeak y = (Nothing /=) . (findLeak y $ primeFactorize y)
 
--- leakPoints :: Integer -> [Integer]
--- leakPoints y = nub $ foldl calcX [] [(y1, x1) | y1 <- facts, x1 <- [1..(y1-1)]]
---     where 
---         facts = factorize y
---         calcX :: [Integer] -> (Integer, Integer) -> [Integer]
---         calcX st (y1, x1) =
---             let valid = 
---                     if isValidPoint x1 y1 
---                         then isC projectedX y 
---                         else False                 
---                 projectedX = (x1 * y `div` y1) in
---                 if valid then insert projectedX st else st
+leakyPoints :: Integer -> [ Integer ]
+leakyPoints hits = filter hasLeak' points
+        where 
+            y = (hits + 1) `div` 2 + 1
+            startX = if even y then 6 else 3
+            cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
+            points = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
+            hasLeak' = hasLeak y
 
+leakyPoints1 :: Integer -> [Integer]
+leakyPoints1 hits = 
+    let y = (hits + 1) `div` 2 + 1
+        startX = if even y then 6 else 3
+        cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
+        ptXs = takeWhile (< y) [ startX + x * 6 | x <- [0..]] in
+        concatMap (leaksOnY y ptXs) $ (reverse $ factorize y)
 
+leaksOnY :: Integer -> [Integer] -> Integer -> [Integer]
+leaksOnY y ptXs y1 = 
+    let fstX = findFirstLeakyX y ptXs y1 in
+        case fstX of 
+            Nothing -> []
+            Just x1 ->
+                let interval = if even y1 then x1 else x1 * 2 in
+                    takeWhile (< y) $ iterate (+ interval) x1
+
+leakCount :: Integer -> [Integer] -> Integer
+leakCount y ptXs = toInteger $ length $ foldl (\st y1 -> union st $ leaksOnY y ptXs y1) [] (factorize y)
+
+leakCountOnY :: Integer -> [Integer] -> Integer -> Integer
+leakCountOnY y ptXs y1 = 
+    case findFirstLeakyX y ptXs y1 of
+        Nothing -> 0
+        Just x1 -> 
+            let interval = if even y1 then x1 else x1 * 2 in
+                if even y then ((y-1) `div` interval) else ((y + 1) `div` interval)
+
+bounces1 hits =
+    let y = (hits + 1) `div` 2 + 1
+        startX = if even y then 6 else 3
+        cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
+        ptXs = takeWhile (< y) [ startX + x * 6 | x <- [0..]] in
+        2 * (cCount - (leakCount y ptXs))
