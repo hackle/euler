@@ -2,13 +2,20 @@ module Euler202 where
 
 import Data.List
 
+data Analysis = Analysis { y::Integer, startX::Integer, pointsCount::Integer, xs::[Integer] }
+
+analyze :: Integer -> Analysis
+analyze hits = Analysis { y = y, startX = startX, pointsCount = pointsCount, xs = xs }
+    where 
+        y = (hits + 1) `div` 2 + 1
+        startX = if even y then 6 else 3
+        pointsCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
+        xs = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
+
 validPoints :: Integer -> [ Integer ]
-validPoints hits = filter (not.hasLeak') points
+validPoints hits = filter (not.hasLeak') xs
         where 
-            y = (hits + 1) `div` 2 + 1
-            startX = if even y then 6 else 3
-            cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
-            points = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
+            Analysis { xs = xs, y = y } = analyze hits
             hasLeak' = hasLeak y
 
 bounces :: Integer -> Integer
@@ -67,21 +74,15 @@ hasLeak :: Integer -> Integer -> Bool
 hasLeak y = (Nothing /=) . (findLeak y $ primeFactorize y)
 
 leakyPoints :: Integer -> [ Integer ]
-leakyPoints hits = filter hasLeak' points
+leakyPoints hits = filter hasLeak' xs
         where 
-            y = (hits + 1) `div` 2 + 1
-            startX = if even y then 6 else 3
-            cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
-            points = takeWhile (< y) [ startX + x * 6 | x <- [0..]]
+            Analysis { xs = xs, y = y } = analyze hits
             hasLeak' = hasLeak y
 
 leakyPoints1 :: Integer -> [Integer]
-leakyPoints1 hits = 
-    let y = (hits + 1) `div` 2 + 1
-        startX = if even y then 6 else 3
-        cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
-        ptXs = takeWhile (< y) [ startX + x * 6 | x <- [0..]] in
-        concatMap (leaksOnY y ptXs) $ (reverse $ factorize y)
+leakyPoints1 hits =
+    let Analysis { xs = xs, y = y } = analyze hits in
+        concatMap (leaksOnY y xs) $ (reverse $ factorize y)
 
 leaksOnY :: Integer -> [Integer] -> Integer -> [Integer]
 leaksOnY y ptXs y1 = 
@@ -104,8 +105,5 @@ leakCountOnY y ptXs y1 =
                 if even y then ((y-1) `div` interval) else ((y + 1) `div` interval)
 
 bounces1 hits =
-    let y = (hits + 1) `div` 2 + 1
-        startX = if even y then 6 else 3
-        cCount = if even y then (y-1) `div` 6 else (y + 1) `div` 6
-        ptXs = takeWhile (< y) [ startX + x * 6 | x <- [0..]] in
-        2 * (cCount - (leakCount y ptXs))
+    let Analysis { xs = xs, y = y, pointsCount = cCount } = analyze hits in
+        2 * (cCount - (leakCount y xs))
