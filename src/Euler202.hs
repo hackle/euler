@@ -3,6 +3,7 @@ module Euler202 where
 import Data.List
 
 data Analysis = Analysis { y::Integer, startX::Integer, pointsCount::Integer, xs::[Integer] }
+type Point = (Integer, Integer)
 
 analyze :: Integer -> Analysis
 analyze hits = Analysis { y = y, startX = startX, pointsCount = pointsCount, xs = xs }
