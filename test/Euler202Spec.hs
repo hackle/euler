@@ -30,33 +30,37 @@ main = hspec $ do
         --     let hits = 1000001
         --         Analysis { xs = xs, y = y, pointsCount = cCount } = analyze hits in
         --         2 * (cCount - (leakCount y xs)) `shouldBe` 80840
-        it "collision - when points from different Y share the same ratio, should calculate from less Y" $ do
+        -- it "collision - when points from different Y share the same ratio, should calculate from less Y" $ do
+        --     let hits = 1000001
+        --         Analysis { xs = xs, y = y, pointsCount = cCount } = analyze hits 
+        --         y1:y2:_ = reverse $ factorize y
+        --         [div1,div2] = map (y `div`) [y1,y2]
+        --         (Just x1) = findFirstLeakyX y xs y1
+        --         (Just x2) = findFirstLeakyX y xs y2 in
+        --         (take 2 $ findCollisions (x1 `div` div1, y1) (x2 `div` div2, y2)) `shouldBe` [((1, 1), (2,2))]
+        -- it "can also be done just using least common multiples of Xs on Y" $ do
+        --     let hits = 1000001
+        --         analysis@(Analysis { xs = xs, y = y, pointsCount = cCount }) = analyze hits 
+        --         y1:y2:_ = reverse $ factorize y
+        --         [div1,div2] = map (y `div`) [y1,y2]
+        --         (Just x1) = findFirstLeakyX y xs y1
+        --         (Just x2) = findFirstLeakyX y xs y2
+        --         interval1 = intervalX x1 y
+        --         interval2 = intervalX x2 y in
+        --         (take 5 $ collisions analysis y1 y2)  `shouldBe` (take 5 $ findCollisions (x1 `div` div1, y1) (x2 `div` div2, y2))
+        it "can get total of leaks" $ do
             let hits = 1000001
-                Analysis { xs = xs, y = y, pointsCount = cCount } = analyze hits 
-                y1:y2:_ = reverse $ factorize y
-                [div1,div2] = map (y `div`) [y1,y2]
-                (Just x1) = findFirstLeakyX y xs y1
-                (Just x2) = findFirstLeakyX y xs y2 in
-                (findCollisions (x1 `div` div1, y1) (x2 `div` div2, y2)) `shouldBe` [((1, 1), (2,2))]
-
-repeatOnY :: Integer -> Integer -> [Integer]
-repeatOnY x y = 
-    let interval = if even y then x else x * 2 in
-        takeWhile (< y) $ iterate (+ interval) x
-
-ratioEqual :: Point -> Point -> Bool
-ratioEqual (x1, y1) (x2, y2) = 
-    map (`div` gcd1) [x1, y1] == map (`div` gcd2) [x2, y2]
-    where
-        gcd1 = gcd x1 y1
-        gcd2 = gcd x2 y2
-
-findCollisions :: Point -> Point -> [(Point, Point)]
-findCollisions greater@(x1, y1) smaller@(x2, y2) = 
-        do  x2' <- x2s
-            x1' <- x1s
-            True <- return (ratioEqual (x1', y1) (x2', y2))
-            return ((x1', y1), (x2', y2))
-        where
-            x1s = repeatOnY x1 y1
-            x2s = repeatOnY x2 y2
+                analysis@(Analysis { yFactors = yFactors, xs = xs, y = y, pointsCount = cCount }) = analyze hits in
+                (map (leakTotalOnY analysis) yFactors) `shouldBe` 0 : (map (toInteger.length.(leaksOnY y xs)) yFactors)
+        it "shows the differences in leaks, diff by 2586" $ do
+            let hits = 1000001
+                analysis@(Analysis { yFactors = yFactors, xs = xs, y = y, pointsCount = cCount }) = analyze hits in
+                sum (map (leakTotalOnY analysis) yFactors) `shouldBe` (cCount - 80840 `div` 2)
+        it "shows the collisions" $ do
+            let hits = 1000001
+                analysis@(Analysis { yFactors = yFactors, xs = xs, y = y, pointsCount = cCount }) = analyze hits
+                zips = zip yFactors $ drop 1 yFactors
+                colls = map (\(y1, y2) -> collisionCounts analysis y1 y2) zips in
+                -- colls `shouldBe` []
+                sum colls `shouldBe` 2586
+                
