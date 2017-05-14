@@ -158,8 +158,11 @@ collisionCounts (Analysis { y = y, yFactors = yFactors, xs = xs }) y1 y2 =
         firstCollision = do
             x1 <- findFirstLeakyX y xs y1
             x2 <- findFirstLeakyX y xs y2
-            let lcmn = lcm x1 x2 in
-                return (countPoints y (intervalX lcmn y1))
+            let interval1 = intervalX x1 y1
+                interval2 = intervalX x2 y2
+                lcmn = lcm interval1 interval2 
+                divlcm1 = lcmn `div` interval1 in
+                return (countPoints y1 (intervalX divlcm1 y1))
 
 collisions :: Analysis -> Integer -> Integer -> [(Point, Point)]
 collisions (Analysis { y = y, yFactors = yFactors, xs = xs }) y1 y2 = 
